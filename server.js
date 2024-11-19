@@ -29,19 +29,92 @@ app.get('/', (req, res) => {
 });
 
 // GET Endpoint käsitellään user ID
-app.get('/user/:id', async (req, res) => {
-    const userId = req.params.id; // lukee ja pääsee 'id' parametriin
-    console.log(`User ID received: ${userId}`);  // kun kirjoitan esim /user/123 niin hakee käyttäjän "123" tiedon.
+app.get('/User/:id', async (req, res) => {
+    const userId = req.params.id; // Get user ID from the URL
+    console.log(`User ID received: ${userId}`);  // Logs the received user ID
     
     try {
-        // Query the database for the user
-        const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+        // Use the exact case-sensitive name for the column
+        const result = await pool.query('SELECT * FROM "User" WHERE "userid" = $1', [userId]);
         if (result.rows.length > 0) {
             res.json({ message: 'done', user: result.rows[0] });
         } else {
-            res.status(404).json({ error: 'User not found' });  //jos käyttäjää ei löydy tulee koodi 404
+            res.status(404).json({ error: 'User not found' });  // If no user is found, return 404
         }
     } catch (error) {
-        res.status(500).json({ error: 'Database query failed', details: error.message }); //jos tulee jokin muu database ongelma että ei pääse käsiksi niin error 500
+        res.status(500).json({ error: 'Database query failed', details: error.message }); // Return 500 on error
     }
 });
+
+app.get('/movie/:movieid', async (req, res) => {
+    const movieid = req.params.movieid;
+    console.log(`Movie id received:) ${movieid}`);
+try {
+    // Use the exact case-sensitive name for the column
+    const result = await pool.query('SELECT * FROM "movie" WHERE "movieid" = $1', [movieid]);
+
+    if (result.rows.length > 0) {
+        res.json({ message: 'done', movie: result.rows[0] });
+    } else {
+        res.status(404).json({ error: 'movie not found' });  // If no movie is found, return 404
+    }
+} catch (error) {
+    res.status(500).json({ error: 'Database query failed', details: error.message }); // Return 500 on error
+}
+});
+
+app.get('/genre/:genreid', async (req, res) => {
+    const genreid = req.params.genreid;
+    console.log(`Movie id received:) ${genreid}`);
+try {
+    // Use the exact case-sensitive name for the column
+    const result = await pool.query('SELECT * FROM "genre" WHERE "genreid" = $1', [genreid]);
+    
+    if (result.rows.length > 0) {
+        res.json({ message: 'done', genre: result.rows[0] });
+    } else {
+        res.status(404).json({ error: 'genre not found' });  // If no movie is found, return 404
+    }
+} catch (error) {
+    res.status(500).json({ error: 'Database query failed', details: error.message }); // Return 500 on error
+}
+});
+
+app.get('/favorite/:favoriteid', async (req, res) => {
+    const favoriteid = req.params.favoriteid;
+    console.log(`Favorite ID received: ${favoriteid}`);
+    
+    try {
+        // Use the lowercase table and column names
+        const result = await pool.query('SELECT * FROM "favorite" WHERE "favoriteid" = $1', [favoriteid]);
+        
+        if (result.rows.length > 0) {
+            res.json({ message: 'done', favorite: result.rows[0] });
+        } else {
+            res.status(404).json({ error: 'Favorite not found' });  // If no favorite is found, return 404
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Database query failed', details: error.message }); // Return 500 on error
+    }
+});
+
+app.get('/review/:reviewid', async (req, res) => {
+    const reviewid = req.params.reviewid;
+    console.log(`Review ID received: ${reviewid}`);
+    
+    try {
+        // Use the lowercase table and column names
+        const result = await pool.query('SELECT * FROM "review" WHERE "reviewid" = $1', [reviewid]);
+        
+        if (result.rows.length > 0) {
+            res.json({ message: 'done', reviewid: result.rows[0] });
+        } else {
+            res.status(404).json({ error: 'Review not found' });  // If no favorite is found, return 404
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Database query failed', details: error.message }); // Return 500 on error
+    }
+});
+
+
+
