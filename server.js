@@ -50,27 +50,29 @@ app.get('/users', async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     console.log(`Fetching users for page: ${page}`);
 
-    // Dummy user data (replace with actual DB query)
-    const dummyUsers = [
-        { userid: 1, username: 'john_doe' },
-        { userid: 2, username: 'jane_smith' },
-        { userid: 3, username: 'bob_jones' },
-        { userid: 4, username: 'alice_doe' },
-        { userid: 5, username: 'charlie_brown' },
-    ];
-
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const paginatedUsers = dummyUsers.slice(startIndex, endIndex);
+    try {
+        // Query the database to get the paginated users
+        const result = await pool.query('SELECT * FROM "User" LIMIT $1 OFFSET $2', [limit, startIndex]);
 
-    res.json({
-        page: Number(page),
-        limit: Number(limit),
-        totalUsers: dummyUsers.length,
-        data: paginatedUsers,
-    });
+        // Query to get the total number of users
+        const totalResult = await pool.query('SELECT COUNT(*) FROM "User"');
+        const totalUsers = totalResult.rows[0].count;
+
+        // Respond with paginated users and total count
+        res.json({
+            page: Number(page),
+            limit: Number(limit),
+            totalUsers: totalUsers,
+            data: result.rows,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Database query failed', details: error.message });
+    }
 });
+
 
 
 
@@ -91,34 +93,25 @@ try {
 }
 });
 
-// Get all movies (paginated) using dummy data
-app.get('/moviename', (req, res) => {
-    const { page = 1, limit = 5 } = req.query; // Get page number and limit from query, defaults to 1 and 5
+app.get('/movie', async (req, res) => {
+    const { page = 1, limit = 5 } = req.query;
     console.log(`Fetching movies for page: ${page}`);
     
-    // Dummy movie data matching your database structure
-    const dummyMovies = [
-        { movieid: 1, genreid: 1, moviename: 'Action Movie', year: 2023 },
-        { movieid: 2, genreid: 2, moviename: 'Comedy Movie', year: 2024 },
-        { movieid: 3, genreid: 3, moviename: 'Drama Movie', year: 2024 },
-        { movieid: 4, genreid: 4, moviename: 'Horror Movie', year: 2022 },
-        { movieid: 5, genreid: 5, moviename: 'Romantic Movie', year: 2023 },
-    ];
+    try {
+        const result = await pool.query('SELECT * FROM "movie" LIMIT $1 OFFSET $2', [limit, (page - 1) * limit]);
+        const totalResult = await pool.query('SELECT COUNT(*) FROM "movie"'); // Get the total count of movies
 
-    // Calculate pagination range
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
+        const totalMovies = totalResult.rows[0].count;
 
-    // Get the paginated movies
-    const paginatedMovies = dummyMovies.slice(startIndex, endIndex);
-
-    // Send paginated response
-    res.json({
-        page: Number(page),
-        limit: Number(limit),
-        totalMovies: dummyMovies.length,
-        data: paginatedMovies,
-    });
+        res.json({
+            page: Number(page),
+            limit: Number(limit),
+            totalMovies: totalMovies,
+            data: result.rows,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Database query failed', details: error.message });
+    }
 });
 
 
@@ -195,28 +188,24 @@ app.get('/favorite/:favoriteid', async (req, res) => {
 app.get('/favorite', async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     console.log(`Fetching favorites for page: ${page}`);
+    
+    try {
+        const result = await pool.query('SELECT * FROM "favorite" LIMIT $1 OFFSET $2', [limit, (page - 1) * limit]);
+        const totalResult = await pool.query('SELECT COUNT(*) FROM "favorite"'); // Get the total count of favorites
 
-    // DB query
-    const dummyFavorites = [
-        { favoriteid: 1, movieid: 1, userid: 1 },
-        { favoriteid: 2, movieid: 2, userid: 2 },
-        { favoriteid: 3, movieid: 3, userid: 3 },
-        { favoriteid: 4, movieid: 4, userid: 4 },
-        { favoriteid: 5, movieid: 5, userid: 5 },
-    ];
+        const totalFavorites = totalResult.rows[0].count;
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-
-    const paginatedFavorites = dummyFavorites.slice(startIndex, endIndex);
-
-    res.json({
-        page: Number(page),
-        limit: Number(limit),
-        totalFavorites: dummyFavorites.length,
-        data: paginatedFavorites,
-    });
+        res.json({
+            page: Number(page),
+            limit: Number(limit),
+            totalFavorites: totalFavorites,
+            data: result.rows,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Database query failed', details: error.message });
+    }
 });
+
 
 
 app.get('/review/:reviewid', async (req, res) => {
@@ -246,28 +235,24 @@ app.post('/review', (req, res) => {
 app.get('/review', async (req, res) => {
     const { page = 1, limit = 5 } = req.query;
     console.log(`Fetching reviews for page: ${page}`);
+    
+    try {
+        const result = await pool.query('SELECT * FROM "review" LIMIT $1 OFFSET $2', [limit, (page - 1) * limit]);
+        const totalResult = await pool.query('SELECT COUNT(*) FROM "review"'); // Get the total count of reviews
 
-    // Dummy review data (replace with actual DB query)
-    const dummyReviews = [
-        { reviewid: 1, movieid: 1, username: 'john_doe', rating: 5, review: 'Great movie!' },
-        { reviewid: 2, movieid: 2, username: 'jane_smith', rating: 4, review: 'Very funny!' },
-        { reviewid: 3, movieid: 3, username: 'bob_jones', rating: 3, review: 'Okay, but predictable.' },
-        { reviewid: 4, movieid: 4, username: 'alice_doe', rating: 2, review: 'Not scary enough.' },
-        { reviewid: 5, movieid: 5, username: 'charlie_brown', rating: 5, review: 'Romantic and touching.' },
-    ];
+        const totalReviews = totalResult.rows[0].count;
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-
-    const paginatedReviews = dummyReviews.slice(startIndex, endIndex);
-
-    res.json({
-        page: Number(page),
-        limit: Number(limit),
-        totalReviews: dummyReviews.length,
-        data: paginatedReviews,
-    });
+        res.json({
+            page: Number(page),
+            limit: Number(limit),
+            totalReviews: totalReviews,
+            data: result.rows,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Database query failed', details: error.message });
+    }
 });
+
 
 
 app.get('/test-db', async (req, res) => {
