@@ -115,11 +115,11 @@ app.get('/movie', async (req, res) => {
 });
 
 
-app.post('/movie', (req, res) => {
-    const { moviename, year, genreid } = req.body; // elokuvan tiedot
+app.post('/movie', async (req, res) => {
+   const { moviename, year, genreid } = req.body; // elokuvan tiedot
     console.log(`Adding new movie: Name=${moviename}, Year=${year}, Genre=${genreid}`);
     res.status(201).json({ message: 'Movie added', movieid: 1 });
-});
+ });
 
 app.get('/genre/:genreid', async (req, res) => {
     const genreid = req.params.genreid;
